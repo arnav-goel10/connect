@@ -152,7 +152,7 @@ class DriveVideo extends Component {
     cancelAnimationFrame(this.frame);
     this.frame = requestAnimationFrame(this.tick);
     if (!isPlaying && !video.paused) {
-      dispatch(play());
+      dispatch(play(true));
     }
   }
 
@@ -160,7 +160,7 @@ class DriveVideo extends Component {
     const { isPlaying, dispatch } = this.props;
     const video = this.videoPlayer.current;
     if (isPlaying && video.paused && !video.ended) {
-      dispatch(pause());
+      dispatch(pause(true));
     }
     this.updateBuffering();
   }
@@ -169,7 +169,7 @@ class DriveVideo extends Component {
     const { desiredPlaySpeed, dispatch } = this.props;
     const { playbackRate } = this.videoPlayer.current;
     if (playbackRate > 0 && playbackRate !== desiredPlaySpeed) {
-      dispatch(setPlaybackSpeed(playbackRate));
+      dispatch(setPlaybackSpeed(playbackRate, true));
     }
   }
 
@@ -187,7 +187,7 @@ class DriveVideo extends Component {
       this.seekTo(loop.startTime);
       this.updatePlayback();
     } else {
-      dispatch(pause());
+      dispatch(pause(true));
     }
   }
 
@@ -276,13 +276,13 @@ class DriveVideo extends Component {
       this.setState({ noVideo: { resume: isPlaying } });
     }
     if (isPlaying) {
-      dispatch(pause());
+      dispatch(pause(true));
     }
   }
 
   clearNoVideo() {
     if (this.state.noVideo?.resume) {
-      this.props.dispatch(play());
+      this.props.dispatch(play(true));
     }
     this.setState({ noVideo: null });
   }
@@ -368,7 +368,7 @@ class DriveVideo extends Component {
     }
     video.play().catch((err) => {
       if (err.name === 'NotAllowedError') {
-        dispatch(pause());
+        dispatch(pause(true));
       }
     });
   }

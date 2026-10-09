@@ -86,25 +86,28 @@ export function videoProgress(offset) {
   };
 }
 
-// pause the playback
-export function pause() {
+// pause the playback, auto ones aren't logged
+export function pause(auto = false) {
   return {
     type: Types.ACTION_PAUSE,
+    auto,
   };
 }
 
 // resume the playback
-export function play() {
+export function play(auto = false) {
   return {
     type: Types.ACTION_PLAY,
+    auto,
   };
 }
 
 // change play speed
-export function setPlaybackSpeed(speed) {
+export function setPlaybackSpeed(speed, auto = false) {
   return {
     type: Types.ACTION_PLAYBACK_SPEED,
     speed,
+    auto,
   };
 }
 
