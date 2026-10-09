@@ -88,13 +88,13 @@ class DriveVideo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { currentRoute, isPlaying, desiredPlaySpeed, seekRequest, offset, loop } = this.props;
+    const { currentRoute, isPlaying, desiredPlaySpeed, seekRequest, loop } = this.props;
     if (currentRoute.fullname !== prevProps.currentRoute.fullname) {
       this.loadSource();
       return;
     }
     if ((currentRoute.videoStartOffset || 0) !== (prevProps.currentRoute.videoStartOffset || 0)) {
-      this.seekTo(offset);
+      this.seekTo(this.currentOffset());
     }
     if (seekRequest !== prevProps.seekRequest) {
       if (this.state.videoError) {
@@ -123,8 +123,13 @@ class DriveVideo extends Component {
     this.pendingHls = null;
   }
 
+  // not in stateToProps: offset changes every frame
+  currentOffset() {
+    return this.props.dispatch((_, getState) => getState().offset);
+  }
+
   onLoadedMetadata() {
-    this.seekTo(this.props.offset);
+    this.seekTo(this.currentOffset());
     this.updatePlayback();
   }
 
@@ -274,11 +279,12 @@ class DriveVideo extends Component {
   }
 
   reportProgress() {
-    const { currentRoute, offset, dispatch } = this.props;
+    const { currentRoute, dispatch } = this.props;
     const video = this.videoPlayer.current;
     if (!video.readyState || video.seeking) {
       return;
     }
+    const offset = this.currentOffset();
     const progress = Math.round(video.currentTime * 1000) + (currentRoute.videoStartOffset || 0);
     if (progress !== offset) {
       dispatch(videoProgress(progress));
@@ -295,10 +301,10 @@ class DriveVideo extends Component {
   }
 
   skipMissingFrag() {
-    const { currentRoute, loop, offset, dispatch } = this.props;
+    const { currentRoute, loop, dispatch } = this.props;
     const video = this.videoPlayer.current;
     const frag = this.missingFrag;
-    const position = video.readyState ? video.currentTime : this.videoTime(offset);
+    const position = video.readyState ? video.currentTime : this.videoTime(this.currentOffset());
     const stalled = video.readyState < video.HAVE_FUTURE_DATA;
     if (!frag || !stalled || position <= frag.start - 1 || position >= frag.end) {
       return false;
@@ -389,7 +395,7 @@ class DriveVideo extends Component {
       }
       this.hls = new Hls({
         maxBufferLength: 40,
-        startPosition: this.videoTime(this.props.offset),
+        startPosition: this.videoTime(this.currentOffset()),
         workerPath: hlsWorker,
         ...api.video.getHlsOptions?.(currentRoute, Hls),
       });
@@ -438,7 +444,6 @@ class DriveVideo extends Component {
 const stateToProps = (state) => ({
   isPlaying: state.isPlaying,
   desiredPlaySpeed: state.desiredPlaySpeed,
-  offset: state.offset,
   seekRequest: state.seekRequest,
   loop: state.loop,
   currentRoute: state.currentRoute,
