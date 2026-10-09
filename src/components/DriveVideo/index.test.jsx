@@ -64,10 +64,14 @@ describe('drive video', () => {
     expect(videoPause).toHaveBeenCalledTimes(1);
   });
 
-  it('follows the speed control', () => {
-    const { store, video } = renderVideo();
+  it('sets the speed while paused and follows the browser', () => {
+    const { store, video } = renderVideo({ isPlaying: false });
     act(() => store.dispatch(setPlaybackSpeed(2)));
     expect(video.playbackRate).toEqual(2);
+    expect(video.defaultPlaybackRate).toEqual(2);
+
+    act(() => { video.playbackRate = 1.5; });
+    expect(store.getState().desiredPlaySpeed).toEqual(1.5);
   });
 
   it('seeks even if progress is reported before the render', () => {
