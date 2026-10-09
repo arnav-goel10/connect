@@ -31,13 +31,13 @@ vi.mock('hls.js/light', () => ({
 const currentRoute = { fullname: 'aaaaaaaaaaaaaaaa|2026-08-06--12-00-00', videoStartOffset: 2000 };
 const loop = { startTime: 5000, duration: 2000 };
 
-function renderVideo(state = {}) {
+function renderVideo(state = {}, props = {}) {
   const store = Redux.createStore(
     rootReducer,
     { ...createInitialState('/'), currentRoute, ...state },
     Redux.applyMiddleware(thunk),
   );
-  const { container } = render(<DriveVideo store={store} />);
+  const { container } = render(<DriveVideo store={store} {...props} />);
   const video = container.querySelector('video');
   Object.defineProperty(video, 'readyState', { value: video.HAVE_ENOUGH_DATA, configurable: true });
   return { store, video };
@@ -77,6 +77,15 @@ describe('drive video', () => {
 
     act(() => { video.playbackRate = 1.5; });
     expect(store.getState().desiredPlaySpeed).toEqual(1.5);
+  });
+
+  it('follows a mute from the browser', () => {
+    const onMuteChange = vi.fn();
+    const { video } = renderVideo({}, { isMuted: true, onMuteChange });
+    fireEvent.volumeChange(video);
+    expect(onMuteChange).not.toHaveBeenCalled();
+    video.muted = false;
+    expect(onMuteChange).toHaveBeenCalledWith(false);
   });
 
   it('does not re-render on progress', () => {
