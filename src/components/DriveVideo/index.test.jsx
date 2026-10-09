@@ -106,6 +106,14 @@ describe('drive video', () => {
     expect(video.currentTime).toEqual(78);
   });
 
+  it('follows a seek from the browser at once', () => {
+    const { store, video } = renderVideo();
+    Object.defineProperty(video, 'seeking', { value: true });
+    video.currentTime = 30;
+    fireEvent.seeking(video);
+    expect(store.getState().offset).toEqual(32000);
+  });
+
   it('retries after an error on a seek or when back online', () => {
     const { store, video } = renderVideo();
     Object.defineProperty(video, 'error', { value: { code: 2 } });

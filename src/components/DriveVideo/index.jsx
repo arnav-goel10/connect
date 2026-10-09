@@ -290,7 +290,7 @@ class DriveVideo extends Component {
   reportProgress() {
     const { currentRoute, dispatch } = this.props;
     const video = this.videoPlayer.current;
-    if (!video.readyState || video.seeking) {
+    if (!video.readyState) {
       return;
     }
     const offset = this.currentOffset();
@@ -435,7 +435,7 @@ class DriveVideo extends Component {
           onLoadedMetadata={this.onLoadedMetadata}
           onTimeUpdate={this.onTimeUpdate}
           onWaiting={this.onWaiting}
-          onSeeking={this.updateBuffering}
+          onSeeking={this.onTimeUpdate}
           onSeeked={this.updateBuffering}
           onCanPlay={this.updateBuffering}
           onPlaying={this.updateBuffering}
